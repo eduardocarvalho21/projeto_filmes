@@ -1,26 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:provider/provider.dart';
 
 import '../models/movie.dart';
+import '../providers/movie_provider.dart';
 
 class MovieItem extends StatelessWidget {
   final Movie movie;
-  final Function(DismissDirection) onDismissed;
   final VoidCallback onTap;
 
   const MovieItem({
     super.key,
     required this.movie,
-    required this.onDismissed,
-    required this.onTap,
+    required this.onTap, required Null Function(dynamic _) onDismissed,
   });
+
+  Future<bool> _confirmDismiss(BuildContext context) async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text('Confirmar Exclusão'),
+        content: Text('Tem certeza que deseja deletar "${movie.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: Color(0xFF1976D2)),),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              'Deletar',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Dismissible(
       key: Key(movie.key.toString()),
       direction: DismissDirection.endToStart,
-      onDismissed: onDismissed,
+      confirmDismiss: (direction) => _confirmDismiss(context),
+      onDismissed: (direction) async {
+        await Provider.of<MovieProvider>(context, listen: false).deleteMovie(movie);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('"${movie.title}" foi deletado.')),
+        );
+      },
       background: Container(
         color: Colors.red,
         alignment: Alignment.centerRight,

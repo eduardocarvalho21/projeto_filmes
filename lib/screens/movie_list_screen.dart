@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/movie.dart';
 import '../providers/movie_provider.dart';
 import 'movie_form_screen.dart';
@@ -64,7 +65,11 @@ class _MovieListScreenState extends State<MovieListScreen> {
                 final movie = movieProvider.movies[index];
                 return MovieItem(
                   movie: movie,
-                  onDismissed: (direction) => _confirmDeletion(movie),
+                  onDismissed: (_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${movie.title} deletado!')),
+                    );
+                  },
                   onTap: () => _showOptionsBottomSheet(context, movie),
                 );
               },
@@ -91,50 +96,18 @@ class _MovieListScreenState extends State<MovieListScreen> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: const Text('Equipe:'),
-        content:
-            const Text('Eduardo Pereira de Carvalho'),
+        content: const Text('Eduardo Pereira de Carvalho'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text(
               'Ok',
               style: TextStyle(color: Color(0xFF1976D2)),
-              ),
+            ),
           ),
         ],
       ),
     );
-  }
-
-  void _confirmDeletion(Movie movie) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text('Confirmar Exclusão'),
-        content: Text('Tem certeza que deseja deletar "${movie.title}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Deletar', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    ).then((confirmed) {
-      if (confirmed == true) {
-        // Aqui: Use a chave Hive do movie para deletar
-        Provider.of<MovieProvider>(context, listen: false).deleteMovie(movie.key);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${movie.title} deletado!')),
-        );
-      } else {
-        Provider.of<MovieProvider>(context, listen: false).loadMovies();
-      }
-    });
   }
 
   void _showOptionsBottomSheet(BuildContext context, Movie movie) {
@@ -152,8 +125,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (_) => MovieDetailScreen(movie: movie)),
+                  MaterialPageRoute(builder: (_) => MovieDetailScreen(movie: movie)),
                 );
               },
             ),
@@ -163,8 +135,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (_) => MovieFormScreen(movie: movie)),
+                  MaterialPageRoute(builder: (_) => MovieFormScreen(movie: movie)),
                 );
               },
             ),
