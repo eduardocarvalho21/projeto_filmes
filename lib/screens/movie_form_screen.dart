@@ -237,28 +237,42 @@ class _MovieFormScreenState extends State<MovieFormScreen> {
   }
 
   Widget _buildRatingBar() {
-    return Row(
-      children: [
-        const Text('Nota:'),
-        const SizedBox(width: 8),
-        RatingBar.builder(
-          initialRating: _currentScore,
-          minRating: 0,
-          direction: Axis.horizontal,
-          allowHalfRating: false,
-          itemCount: 5,
-          itemBuilder: (context, _) => const Icon(
-            Icons.star,
-            color: Colors.amber,
-          ),
-          itemSize: 32,
-          onRatingUpdate: (rating) {
-            setState(() {
-              _currentScore = rating;
-            });
-          },
-        ),
-      ],
-    );
-  }
+  return Row(
+    children: [
+      const Text('Nota:'),
+      const SizedBox(width: 8),
+      RatingBar.builder(
+        initialRating: _currentScore,
+        minRating: 0,
+        direction: Axis.horizontal,
+        allowHalfRating: false,
+        itemCount: 5,
+        itemSize: 32,
+        itemBuilder: (context, index) {
+          bool isFilled = _currentScore > index;
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(
+                Icons.star,
+                color: isFilled ? Colors.amber : Colors.transparent,
+                size: 32,
+              ),
+              const Icon(
+                Icons.star_border,
+                color: Colors.blue,
+                size: 32,
+              ),
+            ],
+          );
+        },
+        onRatingUpdate: (rating) {
+          setState(() {
+            _currentScore = rating;
+          });
+        },
+      ),
+    ],
+  );
+}
 }
